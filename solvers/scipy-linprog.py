@@ -79,8 +79,7 @@ class Solver(BaseSolver):
         'scipy'
     ]
     parameters = {
-        # 'solver': ['simplex', 'interior-point', 'highs'],
-        'solver': ['simplex', 'interior-point'],
+        'solver': ['simplex', 'interior-point', 'highs'],
     }
 
     def set_objective(self, X, y, reg, quantile):
