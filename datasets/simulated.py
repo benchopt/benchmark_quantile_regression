@@ -12,7 +12,7 @@ class Dataset(BaseDataset):
     parameters = {
         'n_samples, n_features': [
             (100, 50),
-            # (5000, 200)
+            (5000, 200)
         ]
     }
 
@@ -23,10 +23,11 @@ class Dataset(BaseDataset):
         self.random_state = random_state
 
     def get_data(self):
-
         rng = np.random.RandomState(self.random_state)
+        coef = rng.randn(self.n_features)
         X = rng.randn(self.n_samples, self.n_features)
-        y = rng.randn(self.n_samples)
+        y = X @ coef + 0.1 * rng.randn(self.n_samples)
+        y += 100 * rng.randn(self.n_samples)  # add intercept
 
         data = dict(X=X, y=y)
 

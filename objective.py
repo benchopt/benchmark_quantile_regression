@@ -24,8 +24,10 @@ class Objective(BaseObjective):
     def set_data(self, X, y):
         self.X, self.y = X, y
 
-    def compute(self, beta):
-        y_pred = self.X.dot(beta)
+    def compute(self, params):
+        intercept = params[0]
+        beta = params[1:]
+        y_pred = self.X.dot(beta) + intercept
         l1 = np.sum(np.abs(beta))
         return pin_ball_loss(self.y, y_pred, self.quantile) + self.reg * l1
 

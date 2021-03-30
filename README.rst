@@ -8,8 +8,7 @@ This benchmark is dedicated to the the L1-regularized quantile regression proble
 
 .. math::
 
-    \min_{w} \frac{1}{n} \sum_{i=1}^{n} \text{pinball}(y_i, x_i^\top w) + \frac{\lambda}{2} \|w\|_1
-
+    \min_{\beta, \beta_0} \frac{1}{n} \sum_{i=1}^{n} \text{pinball}(y_i, x_i^\top \beta + \beta_0) + \lambda \|w\|_1
 
 where
 
@@ -38,7 +37,7 @@ Apart from the problem, options can be passed to `benchopt run`, to restrict the
 
 .. code-block::
 
-	$ benchopt run benchmark_quantile_regression -s solver1 -d dataset2 --max-runs 10 --n-repetitions 10
+	$ benchopt run benchmark_quantile_regression -s scipy -d simulated --max-runs 10 --n-repetitions 10
 
 
 Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/api.html.

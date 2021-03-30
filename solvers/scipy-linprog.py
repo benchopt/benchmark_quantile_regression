@@ -6,9 +6,72 @@ with safe_import_context() as import_ctx:
     from scipy.optimize import linprog
 
 
+def quantile_regression(X, y, quantile, reg, n_iter, fit_intercept=True):
+    n_samples, n_features = X.shape
+    sample_weights = np.ones(n_samples) / n_samples
+    n_params = n_features
+    if fit_intercept:
+        n_params += 1
+
+    # the linear programming formulation of quantile regression
+    # follows https://stats.stackexchange.com/questions/384909/
+    #
+    # The objective is defined as 1/n * sum(pinball loss) + alpha * L1.
+    # So we rescale the penalty term, which is equivalent.
+    c = np.concatenate([
+        np.ones(n_params * 2) * reg,
+        sample_weights * quantile,
+        sample_weights * (1 - quantile),
+    ])
+
+    if fit_intercept:
+        # do not penalize the intercept
+        c[0] = 0
+        c[n_params] = 0
+
+        A_eq = np.concatenate([
+            np.ones((n_samples, 1)),
+            X,
+            -np.ones((n_samples, 1)),
+            -X,
+            np.eye(n_samples),
+            -np.eye(n_samples),
+        ], axis=1)
+    else:
+        A_eq = np.concatenate([
+            X,
+            -X,
+            np.eye(n_samples),
+            -np.eye(n_samples),
+        ], axis=1)
+
+    b_eq = y
+
+    method = 'interior-point'
+
+    result = linprog(
+        c=c,
+        A_eq=A_eq,
+        b_eq=b_eq,
+        method=method,
+        options={'maxiter': n_iter},
+    )
+    solution = result.x
+    params = solution[:n_params] - solution[n_params:2 * n_params]
+
+    if fit_intercept:
+        coef_ = params[1:]
+        intercept_ = params[0]
+    else:
+        coef_ = params
+        intercept_ = 0.0
+
+    return coef_, intercept_
+
+
 class Solver(BaseSolver):
     """Simplex solver using scipy linprog function."""
-    name = 'scikit-linprog'
+    name = 'scipy-linprog'
 
     install_cmd = 'conda'
     requirements = [
@@ -24,44 +87,10 @@ class Solver(BaseSolver):
         self.X, self.y, self.reg, self.quantile = X, y, reg, quantile
 
     def run(self, n_iter):
-
-        X, y = self.X, self.y
-        n_samples, n_features = self.X.shape
-        sample_weights = np.ones(n_samples) / n_samples
-
-        # the linear programming formulation of quantile regression
-        # follows https://stats.stackexchange.com/questions/384909/
-        #
-        # The objective is defined as 1/n * sum(pinball loss) + alpha * L1.
-        # So we rescale the penalty term, which is equivalent.
-        c = np.concatenate([
-            np.ones(n_features * 2) * self.reg,
-            sample_weights * self.quantile,
-            sample_weights * (1 - self.quantile),
-        ])
-
-        a_eq_matrix = np.concatenate([
-            X,
-            -X,
-            np.eye(n_samples),
-            -np.eye(n_samples),
-        ], axis=1)
-        b_eq_vector = y
-
-        method = self.solver
-
-        result = linprog(
-            c=c,
-            A_eq=a_eq_matrix,
-            b_eq=b_eq_vector,
-            method=method,
-            options={'maxiter': n_iter},
+        self.coef_, self.intercept_ = quantile_regression(
+            self.X, self.y, self.quantile, self.reg, n_iter, fit_intercept=True
         )
-        solution = result.x
-
-        params_pos = solution[:n_features]
-        params_neg = solution[n_features:2 * n_features]
-        self.w = params_pos - params_neg
 
     def get_result(self):
-        return self.w
+        params = np.concatenate([[self.intercept_], self.coef_], axis=0)
+        return params
