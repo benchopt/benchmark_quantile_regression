@@ -17,7 +17,7 @@ class Objective(BaseObjective):
         'quantile': [0.2, 0.5, 0.8]
     }
 
-    def __init__(self, reg, quantile):
+    def __init__(self, reg=0., quantile=0.5):
         self.reg = reg
         self.quantile = quantile
 
