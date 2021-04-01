@@ -6,7 +6,7 @@ with safe_import_context() as import_ctx:
     from scipy.optimize import linprog
 
 
-def quantile_regression(X, y, quantile, reg, n_iter, fit_intercept=True):
+def quantile_regression(X, y, quantile, reg, n_iter, solver, fit_intercept=True):
     n_samples, n_features = X.shape
     sample_weights = np.ones(n_samples) / n_samples
     n_params = n_features
@@ -47,13 +47,11 @@ def quantile_regression(X, y, quantile, reg, n_iter, fit_intercept=True):
 
     b_eq = y
 
-    method = 'interior-point'
-
     result = linprog(
         c=c,
         A_eq=A_eq,
         b_eq=b_eq,
-        method=method,
+        method=solver,
         options={'maxiter': n_iter},
     )
     solution = result.x
@@ -79,7 +77,10 @@ class Solver(BaseSolver):
         'scipy'
     ]
     parameters = {
-        'solver': ['simplex', 'interior-point', 'highs'],
+        'solver': [
+            'simplex', 'interior-point', 'revised simplex',
+            'highs', 'highs-ipm', 'highs-ds'
+        ],
     }
 
     def set_objective(self, X, y, reg, quantile):
@@ -87,7 +88,8 @@ class Solver(BaseSolver):
 
     def run(self, n_iter):
         self.coef_, self.intercept_ = quantile_regression(
-            self.X, self.y, self.quantile, self.reg, n_iter, fit_intercept=True
+            self.X, self.y, self.quantile, self.reg, n_iter,
+            self.solver, fit_intercept=True
         )
 
     def get_result(self):
