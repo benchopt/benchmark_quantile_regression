@@ -27,7 +27,7 @@ class Dataset(BaseDataset):
         coef = rng.randn(self.n_features)
         X = rng.randn(self.n_samples, self.n_features)
         y = X @ coef + 0.1 * rng.randn(self.n_samples)
-        y += 100 * rng.randn(self.n_samples)  # add intercept
+        y += 100  # add intercept
 
         data = dict(X=X, y=y)
 
