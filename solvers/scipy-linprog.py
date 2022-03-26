@@ -93,7 +93,7 @@ class Solver(BaseSolver):
             'highs', 'highs-ipm', 'highs-ds'
         ],
     }
-    stop_strategy = 'tolerance'
+    stopping_strategy = 'tolerance'
 
     def set_objective(self, X, y, reg, quantile):
         self.X, self.y, self.reg, self.quantile = X, y, reg, quantile
