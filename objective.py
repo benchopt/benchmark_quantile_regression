@@ -10,6 +10,7 @@ def pin_ball_loss(y_true, y_pred, quantile=0.5):
 
 
 class Objective(BaseObjective):
+    min_benchopt_version = "1.3"
     name = "L1-regularized Quantile Regression"
 
     parameters = {
@@ -31,5 +32,5 @@ class Objective(BaseObjective):
         l1 = np.sum(np.abs(beta))
         return pin_ball_loss(self.y, y_pred, self.quantile) + self.reg * l1
 
-    def to_dict(self):
+    def get_objective(self):
         return dict(X=self.X, y=self.y, reg=self.reg, quantile=self.quantile)
