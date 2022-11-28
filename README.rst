@@ -7,7 +7,7 @@ reproducible the comparisons of optimization algorithms.
 This benchmark is dedicated to the the L1-regularized quantile regression problem:
 
 
-$$\\min_{\\beta, \\beta_0} \\frac{1}{n} \\sum_{i=1}^{n} \\text{pinball}(y_i, x_i^\\top \\beta + \\beta_0) + \\lambda \\lveft w \\rvert_1$$
+$$\\min_{\\beta, \\beta_0} \\frac{1}{n} \\sum_{i=1}^{n} \\text{pinball}(y_i, x_i^\\top \\beta + \\beta_0) + \\lambda \\lvert w \\rvert_1$$
 
 where
 
