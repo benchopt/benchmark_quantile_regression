@@ -9,7 +9,7 @@ with safe_import_context() as import_ctx:
     from scipy.linalg import LinAlgWarning
 
 
-def quantile_regression(X, y, quantile, reg, tol, solver, fit_intercept=True):
+def quantile_regression(X, y, quantile, lmbd, tol, solver, fit_intercept=True):
     n_samples, n_features = X.shape
     sample_weights = np.ones(n_samples) / n_samples
     n_params = n_features
@@ -22,7 +22,7 @@ def quantile_regression(X, y, quantile, reg, tol, solver, fit_intercept=True):
     # The objective is defined as 1/n * sum(pinball loss) + alpha * L1.
     # So we rescale the penalty term, which is equivalent.
     c = np.concatenate([
-        np.ones(n_params * 2) * reg,
+        np.ones(n_params * 2) * lmbd,
         sample_weights * quantile,
         sample_weights * (1 - quantile),
     ])
@@ -95,16 +95,17 @@ class Solver(BaseSolver):
     }
     stop_strategy = 'tolerance'
 
-    def set_objective(self, X, y, reg, quantile):
-        self.X, self.y, self.reg, self.quantile = X, y, reg, quantile
+    def set_objective(self, X, y, lmbd, quantile, fit_intercept):
+        self.X, self.y, self.lmbd, self.quantile = X, y, lmbd, quantile
+        self.fit_intercept = fit_intercept
 
     def run(self, tol):
         tol = 1e-3 * tol
         self.coef_, self.intercept_ = quantile_regression(
-            self.X, self.y, self.quantile, self.reg, tol,
-            self.solver, fit_intercept=True
+            self.X, self.y, self.quantile, self.lmbd, tol,
+            self.solver, fit_intercept=self.fit_intercept
         )
 
     def get_result(self):
-        params = np.concatenate([[self.intercept_], self.coef_], axis=0)
+        params = np.concatenate((self.coef_, [self.intercept_]))
         return params
