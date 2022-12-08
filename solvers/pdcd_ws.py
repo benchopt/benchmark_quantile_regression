@@ -35,7 +35,7 @@ class Solver(BaseSolver):
         self.datafit = Pinball(self.quantile)
 
         self.solver = PDCD_WS(
-            tol=1e-9,
+            tol=1e-12,
             dual_init=np.sign(y)/2 + (quantile - 0.5)
         )
 
