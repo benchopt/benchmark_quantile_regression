@@ -1,5 +1,6 @@
 from benchopt import BaseObjective
 import numpy as np
+from numpy.linalg import norm
 
 
 def pin_ball_loss(y_true, y_pred, quantile=0.5):
@@ -34,3 +35,19 @@ class Objective(BaseObjective):
 
     def get_objective(self):
         return dict(X=self.X, y=self.y, reg=self.reg, quantile=self.quantile)
+
+    def _get_lambda_max(self, X, y):
+        # optimality condition for w = 0.
+        #   for all g in subdiff pinball(y), g must be in subdiff ||.||_1(0)
+        # hint: consider max(x, 0) = (x + |x|) / 2 to compute subdiff pinball
+        subdiff_zero = np.sign(y)/2 + (self.quantile - 0.5)
+        lmbd_max = norm(X.T @ subdiff_zero, ord=np.inf)
+
+        # intercept is equivalent to adding a column of ones in X
+        if self.fit_intercept:
+            lmbd_max = max(
+                lmbd_max,
+                np.sum(subdiff_zero)
+            )
+
+        return lmbd_max
