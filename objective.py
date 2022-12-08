@@ -39,7 +39,8 @@ class Objective(BaseObjective):
         return pin_ball_loss(self.y, y_pred, self.quantile) + self.lmbd * l1
 
     def get_objective(self):
-        return dict(X=self.X, y=self.y, lmbd=self.lmbd, quantile=self.quantile)
+        return dict(X=self.X, y=self.y, lmbd=self.lmbd, quantile=self.quantile,
+                    fit_intercept=self.fit_intercept)
 
     def _get_lambda_max(self, X, y):
         # optimality condition for w = 0.
