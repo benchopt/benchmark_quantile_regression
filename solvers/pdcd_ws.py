@@ -12,6 +12,7 @@ with safe_import_context() as import_ctx:
 class Solver(BaseSolver):
     name = "PDCD-WS"
 
+    install_cmd = 'conda'
     requirements = [
         'pip:git+https://github.com/Badr-MOUFAD/skglm.git@pinball-df'
     ]
