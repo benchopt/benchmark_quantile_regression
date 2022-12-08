@@ -27,8 +27,10 @@ class Objective(BaseObjective):
         self.X, self.y = X, y
 
     def compute(self, params):
-        intercept = params[0]
-        beta = params[1:]
+        n_features = self.X.shape[1]
+        beta = params[:n_features]
+        intercept = params[0] if self.fit_intercept else 0.
+
         y_pred = self.X.dot(beta) + intercept
         l1 = np.sum(np.abs(beta))
         return pin_ball_loss(self.y, y_pred, self.quantile) + self.reg * l1
@@ -40,7 +42,7 @@ class Objective(BaseObjective):
         # optimality condition for w = 0.
         #   for all g in subdiff pinball(y), g must be in subdiff ||.||_1(0)
         # hint: consider max(x, 0) = (x + |x|) / 2 to compute subdiff pinball
-        subdiff_zero = np.sign(y)/2 + (self.quantile - 0.5)
+        subdiff_zero = np.sign(y)/2 + (self.quantile - 1/2)
         lmbd_max = norm(X.T @ subdiff_zero, ord=np.inf)
 
         # intercept is equivalent to adding a column of ones in X
