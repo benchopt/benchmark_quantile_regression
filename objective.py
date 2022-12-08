@@ -15,7 +15,7 @@ class Objective(BaseObjective):
     name = "L1-regularized Quantile Regression"
 
     parameters = {
-        'reg': [0.05, .1, .5],
+        'reg': [.5, .1, .05],
         'quantile': [0.2, 0.5, 0.8],
         'fit_intercept': [True, False]
     }
