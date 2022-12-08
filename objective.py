@@ -32,7 +32,7 @@ class Objective(BaseObjective):
     def compute(self, params):
         n_features = self.X.shape[1]
         beta = params[:n_features]
-        intercept = params[0] if self.fit_intercept else 0.
+        intercept = params[-1] if self.fit_intercept else 0.
 
         y_pred = self.X.dot(beta) + intercept
         l1 = np.sum(np.abs(beta))
@@ -47,13 +47,13 @@ class Objective(BaseObjective):
         #   for all g in subdiff pinball(y), g must be in subdiff ||.||_1(0)
         # hint: consider max(x, 0) = (x + |x|) / 2 to compute subdiff pinball
         subdiff_zero = np.sign(y)/2 + (self.quantile - 1/2)
-        lmbd_max = norm(X.T @ subdiff_zero, ord=np.inf)
+        lmbd_max = norm(X.T @ subdiff_zero, ord=np.inf) / len(y)
 
         # intercept is equivalent to adding a column of ones in X
         if self.fit_intercept:
             lmbd_max = max(
                 lmbd_max,
-                np.sum(subdiff_zero)
+                np.mean(subdiff_zero)
             )
 
         return lmbd_max
