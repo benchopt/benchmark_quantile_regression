@@ -16,15 +16,18 @@ class Objective(BaseObjective):
 
     parameters = {
         'reg': [0.05, .1, .5],
-        'quantile': [0.2, 0.5, 0.8]
+        'quantile': [0.2, 0.5, 0.8],
+        'fit_intercept': [True, False]
     }
 
-    def __init__(self, reg=0., quantile=0.5):
+    def __init__(self, reg=0., quantile=0.5, fit_intercept=True):
         self.reg = reg
         self.quantile = quantile
+        self.fit_intercept = fit_intercept
 
     def set_data(self, X, y):
         self.X, self.y = X, y
+        self.lmbd = self.reg * self._get_lambda_max(X, y)
 
     def compute(self, params):
         n_features = self.X.shape[1]
@@ -33,10 +36,10 @@ class Objective(BaseObjective):
 
         y_pred = self.X.dot(beta) + intercept
         l1 = np.sum(np.abs(beta))
-        return pin_ball_loss(self.y, y_pred, self.quantile) + self.reg * l1
+        return pin_ball_loss(self.y, y_pred, self.quantile) + self.lmbd * l1
 
     def get_objective(self):
-        return dict(X=self.X, y=self.y, reg=self.reg, quantile=self.quantile)
+        return dict(X=self.X, y=self.y, lmbd=self.lmbd, quantile=self.quantile)
 
     def _get_lambda_max(self, X, y):
         # optimality condition for w = 0.

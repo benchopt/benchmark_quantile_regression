@@ -95,14 +95,15 @@ class Solver(BaseSolver):
     }
     stop_strategy = 'tolerance'
 
-    def set_objective(self, X, y, lmbd, quantile):
+    def set_objective(self, X, y, lmbd, quantile, fit_intercept):
         self.X, self.y, self.lmbd, self.quantile = X, y, lmbd, quantile
+        self.fit_intercept = fit_intercept
 
     def run(self, tol):
         tol = 1e-3 * tol
         self.coef_, self.intercept_ = quantile_regression(
             self.X, self.y, self.quantile, self.lmbd, tol,
-            self.solver, fit_intercept=True
+            self.solver, fit_intercept=self.fit_intercept
         )
 
     def get_result(self):
