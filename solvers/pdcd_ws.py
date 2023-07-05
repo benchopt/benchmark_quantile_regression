@@ -13,7 +13,7 @@ class Solver(BaseSolver):
     name = "PDCD-WS"
 
     install_cmd = 'conda'
-    requirements = ["skglm>=0.3"]
+    requirements = ["pip:skglm>=0.3"]
 
     references = [
         'Q. Bertrand and Q. Klopfenstein and P.-A. Bannier and G. Gidel '
