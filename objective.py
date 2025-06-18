@@ -11,7 +11,7 @@ def pin_ball_loss(y_true, y_pred, quantile=0.5):
 
 
 class Objective(BaseObjective):
-    min_benchopt_version = "1.3"
+    min_benchopt_version = "1.6"
     name = "L1-regularized Quantile Regression"
 
     parameters = {
@@ -29,18 +29,15 @@ class Objective(BaseObjective):
         self.X, self.y = X, y
         self.lmbd = self.reg * self._get_lambda_max(X, y)
 
-    def compute(self, params):
+    def evaluate_result(self, params):
         n_features = self.X.shape[1]
         beta = params[:n_features]
         intercept = params[-1] if self.fit_intercept else 0.
 
         y_pred = self.X.dot(beta) + intercept
         l1 = np.sum(np.abs(beta))
-        return pin_ball_loss(self.y, y_pred, self.quantile) + self.lmbd * l1
-
-    def get_objective(self):
-        return dict(X=self.X, y=self.y, lmbd=self.lmbd, quantile=self.quantile,
-                    fit_intercept=self.fit_intercept)
+        pobj = pin_ball_loss(self.y, y_pred, self.quantile) + self.lmbd * l1
+        return dict(value=pobj)
 
     def _get_lambda_max(self, X, y):
         # optimality condition for w = 0.
@@ -58,8 +55,13 @@ class Objective(BaseObjective):
 
         return lmbd_max
 
-    def get_one_solution(self):
+    def get_one_result(self):
         n_features = self.X.shape[1]
         if self.fit_intercept:
             n_features += 1
         return np.zeros(n_features)
+
+    def get_objective(self):
+        return dict(
+            X=self.X, y=self.y, lmbd=self.lmbd, quantile=self.quantile,
+            fit_intercept=self.fit_intercept)
