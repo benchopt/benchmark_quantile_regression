@@ -59,7 +59,7 @@ class Objective(BaseObjective):
         n_features = self.X.shape[1]
         if self.fit_intercept:
             n_features += 1
-        return np.zeros(n_features)
+        return dict(params=np.zeros(n_features))
 
     def get_objective(self):
         return dict(
