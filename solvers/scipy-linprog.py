@@ -108,4 +108,4 @@ class Solver(BaseSolver):
 
     def get_result(self):
         params = np.concatenate((self.coef_, [self.intercept_]))
-        return params
+        return dict(params=params)
